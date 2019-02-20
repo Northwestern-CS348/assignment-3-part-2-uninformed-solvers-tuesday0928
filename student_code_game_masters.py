@@ -34,7 +34,31 @@ class TowerOfHanoiGame(GameMaster):
             A Tuple of Tuples that represent the game state
         """
         ### student code goes here
-        pass
+        # peg1
+        peg1 = []
+        onPeg1 = self.kb.kb_ask(parse_input('fact: (on ?d peg1)'))
+        if onPeg1:
+            for disk in onPeg1:
+                peg1.append(int(str(disk.bindings_dict['?d']).replace('disk', '')))
+        peg1.sort()
+
+        # peg2
+        peg2 = []
+        onPeg2 = self.kb.kb_ask(parse_input('fact: (on ?d peg2)'))
+        if onPeg2:
+            for disk in onPeg2:
+                peg2.append(int(str(disk.bindings_dict['?d']).replace('disk', '')))
+        peg2.sort()
+
+        peg3 = []
+        onPeg3 = self.kb.kb_ask(parse_input('fact: (on ?d peg3)'))
+        if onPeg3:
+            for disk in onPeg3:
+                peg3.append(int(str(disk.bindings_dict['?d']).replace('disk', '')))
+        peg3.sort()
+
+        res = tuple(peg1), tuple(peg2), tuple(peg3)
+        return res
 
     def makeMove(self, movable_statement):
         """
@@ -53,7 +77,39 @@ class TowerOfHanoiGame(GameMaster):
             None
         """
         ### Student code goes here
-        pass
+
+        movableQuery = self.produceMovableQuery()
+        matchedQuery = match(movable_statement, movableQuery.statement)
+
+        disk = matchedQuery['?disk']
+        initPeg = matchedQuery['?init']
+        targetPeg = matchedQuery['?target']
+
+        # move the disk from init to target
+        self.kb.kb_assert(parse_input('fact: (on ' + disk + ' ' + targetPeg + ')'))
+        self.kb.kb_retract(parse_input('fact: (on ' + disk + ' ' + initPeg + ')'))
+
+        # remove it from top of current peg
+        self.kb.kb_retract(parse_input('fact: (top ' + disk + ' ' + initPeg + ')'))
+
+        # was target peg empty?
+        targetEmpty = self.kb.kb_ask(parse_input('fact: (empty ' + targetPeg + ')'))
+        if not targetEmpty:
+            old_top = self.kb.kb_ask(parse_input('fact: (top ?disk ' + targetPeg + ')'))[0].bindings_dict['?disk']
+            self.kb.kb_retract(parse_input('fact: (top ' + old_top + ' ' + targetPeg + ')'))
+            self.kb.kb_assert(parse_input('fact: (top ' + disk + ' ' + targetPeg + ')'))
+        else:
+            self.kb.kb_retract(parse_input('fact: (empty ' + targetPeg + ')'))
+            self.kb.kb_assert(parse_input('fact: (top ' + disk + ' ' + targetPeg + ')'))
+
+        # was disk above another disk?
+        aboveAnother = self.kb.kb_ask(parse_input('fact: (above ' + disk + '?disk' + ')'))
+        if aboveAnother:
+            new_top = aboveAnother[0].bindings_dict['?disk']
+            self.kb.kb_retract(parse_input('fact: (above ' + disk + ' ' + new_top + ')'))
+            self.kb.kb_assert(parse_input('fact: (top ' + new_top + ' ' + initPeg + ')'))
+        else:
+            self.kb.kb_assert(parse_input('fact: (empty ' + initPeg + ')'))
 
     def reverseMove(self, movable_statement):
         """
