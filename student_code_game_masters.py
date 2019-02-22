@@ -50,6 +50,7 @@ class TowerOfHanoiGame(GameMaster):
                 peg2.append(int(str(disk.bindings_dict['?d']).replace('disk', '')))
         peg2.sort()
 
+        # peg2
         peg3 = []
         onPeg3 = self.kb.kb_ask(parse_input('fact: (on ?d peg3)'))
         if onPeg3:
@@ -78,38 +79,40 @@ class TowerOfHanoiGame(GameMaster):
         """
         ### Student code goes here
 
+        if not(self.isMovableLegal(movable_statement)):
+            pass
+
         movableQuery = self.produceMovableQuery()
         matchedQuery = match(movable_statement, movableQuery.statement)
 
-        disk = matchedQuery['?disk']
-        initPeg = matchedQuery['?init']
-        targetPeg = matchedQuery['?target']
+        if matchedQuery:
+            disk = matchedQuery['?disk']
+            initPeg = matchedQuery['?init']
+            targetPeg = matchedQuery['?target']
 
-        # move the disk from init to target
-        self.kb.kb_assert(parse_input('fact: (on ' + disk + ' ' + targetPeg + ')'))
-        self.kb.kb_retract(parse_input('fact: (on ' + disk + ' ' + initPeg + ')'))
+            self.kb.kb_retract(parse_input('fact: (on ' + disk + ' ' + initPeg + ')'))
+            self.kb.kb_retract(parse_input('fact: (top ' + disk + ' ' + initPeg + ')'))
 
-        # remove it from top of current peg
-        self.kb.kb_retract(parse_input('fact: (top ' + disk + ' ' + initPeg + ')'))
+            # was disk above another disk?
+            aboveAnother = self.kb.kb_ask(parse_input('fact: (above ' + disk + ' ?disk)'))
+            if aboveAnother:
+                new_top = aboveAnother[0].bindings_dict['?disk']
+                self.kb.kb_retract(parse_input('fact: (above ' + disk + ' ' + new_top + ')'))
+                self.kb.kb_assert(parse_input('fact: (top ' + new_top + ' ' + initPeg + ')'))
+            else:
+                self.kb.kb_assert(parse_input('fact: (empty ' + initPeg + ')'))
 
-        # was target peg empty?
-        targetEmpty = self.kb.kb_ask(parse_input('fact: (empty ' + targetPeg + ')'))
-        if not targetEmpty:
-            old_top = self.kb.kb_ask(parse_input('fact: (top ?disk ' + targetPeg + ')'))[0].bindings_dict['?disk']
-            self.kb.kb_retract(parse_input('fact: (top ' + old_top + ' ' + targetPeg + ')'))
+            # was target peg empty?
+            targetEmpty = self.kb.kb_ask(parse_input('fact: (empty ' + targetPeg + ')'))
+            if not targetEmpty:
+                old_top_query = self.kb.kb_ask(parse_input('fact: (top ?disk ' + targetPeg + ')'))
+                old_top = old_top_query[0].bindings_dict['?disk']
+                self.kb.kb_retract(parse_input('fact: (top ' + old_top + ' ' + targetPeg + ')'))
+                self.kb.kb_assert(parse_input('fact: (above ' + disk + ' ' + old_top + ')'))
+            else:
+                self.kb.kb_retract(parse_input('fact: (empty ' + targetPeg + ')'))
             self.kb.kb_assert(parse_input('fact: (top ' + disk + ' ' + targetPeg + ')'))
-        else:
-            self.kb.kb_retract(parse_input('fact: (empty ' + targetPeg + ')'))
-            self.kb.kb_assert(parse_input('fact: (top ' + disk + ' ' + targetPeg + ')'))
-
-        # was disk above another disk?
-        aboveAnother = self.kb.kb_ask(parse_input('fact: (above ' + disk + '?disk' + ')'))
-        if aboveAnother:
-            new_top = aboveAnother[0].bindings_dict['?disk']
-            self.kb.kb_retract(parse_input('fact: (above ' + disk + ' ' + new_top + ')'))
-            self.kb.kb_assert(parse_input('fact: (top ' + new_top + ' ' + initPeg + ')'))
-        else:
-            self.kb.kb_assert(parse_input('fact: (empty ' + initPeg + ')'))
+            self.kb.kb_assert(parse_input('fact: (on ' + disk + ' ' + targetPeg + ')'))
 
     def reverseMove(self, movable_statement):
         """
@@ -156,7 +159,49 @@ class Puzzle8Game(GameMaster):
             A Tuple of Tuples that represent the game state
         """
         ### Student code goes here
-        pass
+
+        # row 1
+        row1 = [0, 0, 0]
+        in_row_1 = self.kb.kb_ask(parse_input('fact: (atY ?t pos1)'))
+        if in_row_1:
+            for tile in in_row_1:
+                ask_row_pos = self.kb.kb_ask(parse_input('fact: (atX ' + tile.bindings_dict['?t'] + ' ?pos'))
+                row_pos = int(str(ask_row_pos[0].bindings_dict['?pos']).replace('pos',''))
+                temp = tile.bindings_dict['?t']
+                if 'tile' in temp:
+                    temp = temp.replace('tile', '')
+                    row1[row_pos-1] = (int(temp))
+                else:
+                    row1[row_pos-1] = -1
+
+        row2 = [0, 0, 0]
+        in_row_2 = self.kb.kb_ask(parse_input('fact: (atY ?t pos2)'))
+        if in_row_2:
+            for tile in in_row_2:
+                ask_row_pos = self.kb.kb_ask(parse_input('fact: (atX ' + tile.bindings_dict['?t'] + ' ?pos'))
+                row_pos = int(str(ask_row_pos[0].bindings_dict['?pos']).replace('pos',''))
+                temp = tile.bindings_dict['?t']
+                if 'tile' in temp:
+                    temp = temp.replace('tile', '')
+                    row2[row_pos-1] = (int(temp))
+                else:
+                    row2[row_pos-1] = -1
+
+        row3 = [0, 0, 0]
+        in_row_3 = self.kb.kb_ask(parse_input('fact: (atY ?t pos3)'))
+        if in_row_3:
+            for tile in in_row_3:
+                ask_row_pos = self.kb.kb_ask(parse_input('fact: (atX ' + tile.bindings_dict['?t'] + ' ?pos'))
+                row_pos = int(str(ask_row_pos[0].bindings_dict['?pos']).replace('pos',''))
+                temp = tile.bindings_dict['?t']
+                if 'tile' in temp:
+                    temp = temp.replace('tile', '')
+                    row3[row_pos-1] = (int(temp))
+                else:
+                    row3[row_pos-1] = -1
+
+        res = tuple(row1), tuple(row2), tuple(row3)
+        return res
 
     def makeMove(self, movable_statement):
         """
@@ -175,7 +220,25 @@ class Puzzle8Game(GameMaster):
             None
         """
         ### Student code goes here
-        pass
+        movableQuery = self.produceMovableQuery()
+        matchedQuery = match(movable_statement, movableQuery.statement)
+
+        tile = matchedQuery['?piece']
+        initX = matchedQuery['?initX']
+        initY = matchedQuery['?initY']
+        targetX = matchedQuery['?targetX']
+        targetY = matchedQuery['?targetY']
+
+        # move the tile from init to target, move the blank from target to init
+        self.kb.kb_retract(parse_input('fact: (atX ' + tile + ' ' + initX + ')'))
+        self.kb.kb_retract(parse_input('fact: (atY ' + tile + ' ' + initY + ')'))
+        self.kb.kb_retract(parse_input('fact: (atX blank1 ' + targetX + ')'))
+        self.kb.kb_retract(parse_input('fact: (atY blank1 ' + targetY + ')'))
+        self.kb.kb_assert(parse_input('fact: (atX ' + tile + ' ' + targetX + ')'))
+        self.kb.kb_assert(parse_input('fact: (atY ' + tile + ' ' + targetY + ')'))
+        self.kb.kb_assert(parse_input('fact: (atX blank1 ' + initX + ')'))
+        self.kb.kb_assert(parse_input('fact: (atY blank1 ' + initY + ')'))
+
 
     def reverseMove(self, movable_statement):
         """

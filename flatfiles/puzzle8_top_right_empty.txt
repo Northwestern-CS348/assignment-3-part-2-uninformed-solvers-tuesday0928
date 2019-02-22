@@ -17,3 +17,49 @@ fact: (pred obj1 obj2)
 rule: ((pred obj1 obj2) (pred obj2 obj3)) -> (pred obj1 obj3)
 
 """
+
+fact: (isA tile1 tile)
+fact: (isA tile2 tile)
+fact: (isA tile3 tile)
+fact: (isA tile4 tile)
+fact: (isA tile5 tile)
+fact: (isA tile6 tile)
+fact: (isA tile7 tile)
+fact: (isA tile8 tile)
+
+fact: (isA blank1 blank)
+
+fact: (atX tile1 pos2)
+fact: (atY tile1 pos2)
+fact: (atX tile2 pos3)
+fact: (atY tile2 pos3)
+fact: (atX tile3 pos2)
+fact: (atY tile3 pos3)
+fact: (atX tile4 pos2)
+fact: (atY tile4 pos1)
+fact: (atX tile5 pos1)
+fact: (atY tile5 pos1)
+fact: (atX tile6 pos1)
+fact: (atY tile6 pos2)
+fact: (atX tile7 pos1)
+fact: (atY tile7 pos3)
+fact: (atX tile8 pos3)
+fact: (atY tile8 pos2)
+
+fact: (atX blank1 pos3)
+fact: (atY blank1 pos1)
+
+rule: ((atX ?x ?a) (atX ?y ?a) (atY ?x pos2) (isA ?x tile) (isA ?y tile)) -> (adjacent ?x ?y)
+rule: ((atX ?x ?a) (atX ?y ?a) (atY ?y pos2) (isA ?x tile) (isA ?y tile)) -> (adjacent ?x ?y)
+rule: ((atY ?x ?a) (atY ?y ?a) (atX ?y pos2) (isA ?x tile) (isA ?y tile)) -> (adjacent ?x ?y)
+rule: ((atY ?x ?a) (atY ?y ?a) (atX ?x pos2) (isA ?x tile) (isA ?y tile)) -> (adjacent ?x ?y)
+
+rule: ((atX ?x ?a) (atX ?y ?a) (atY ?x pos2) (isA ?x tile) (isA ?y blank)) -> (adjacent ?x ?y)
+rule: ((atX ?x ?a) (atX ?y ?a) (atY ?y pos2) (isA ?x tile) (isA ?y blank)) -> (adjacent ?x ?y)
+rule: ((atY ?x ?a) (atY ?y ?a) (atX ?y pos2) (isA ?x tile) (isA ?y blank)) -> (adjacent ?x ?y)
+rule: ((atY ?x ?a) (atY ?y ?a) (atX ?x pos2) (isA ?x tile) (isA ?y blank)) -> (adjacent ?x ?y)
+
+rule: ((adjacent ?x ?y)) -> (adjacent ?y ?x)
+
+rule: ((adjacent ?tile ?blank) (isA ?tile tile) (isA ?blank blank) (atX ?tile ?tilex) (atY ?tile ?tiley) (atX ?blank ?blankx) (atY ?blank ?blanky)) -> (movable ?tile ?tilex ?tiley ?blankx ?blanky)
+
