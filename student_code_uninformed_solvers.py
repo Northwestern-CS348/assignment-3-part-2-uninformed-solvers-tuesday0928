@@ -38,7 +38,6 @@ class SolverDFS(UninformedSolver):
 
             while startInd < endInd:
                 if self.currentState.children[startInd] not in self.visited:
-                    # found an unvisited child
                     self.currentState.nextChildToVisit = startInd + 1
                     child = self.currentState.children[startInd]
                     self.visited[child] = True
@@ -74,11 +73,6 @@ class SolverBFS(UninformedSolver):
             True if the desired solution state is reached, False otherwise
         """
         ### Student code goes here
-        print("CALL")
-        print("Current state is: ", self.currentState.state)
-        if self.currentState not in self.visited:
-            print("How did you even get here??")
-
         # a trivial case
         if self.currentState.state == self.victoryCondition:
             return True
@@ -86,41 +80,27 @@ class SolverBFS(UninformedSolver):
         if not self.currentState.parent:
             self.queue.append(self.currentState)
 
-        movables = self.gm.getMovables()
-        if movables:
-            print("the movables are: ")
+        if not self.currentState.children:
+            movables = self.gm.getMovables()
             for move in movables:
-                print(move)
                 self.gm.makeMove(move)
                 new_state = GameState(self.gm.getGameState(), self.currentState.depth + 1, move)
-                print("Created new state with move", new_state.state, new_state.requiredMovable)
                 new_state.parent = self.currentState
+                self.currentState.children.append(new_state)
+                self.gm.reverseMove(move)
                 self.queue.append(new_state)
                 self.rear += 1
-                self.gm.reverseMove(move)
-        else:
-            print("no movables from this state")
 
         self.front += 1
         while self.front <= self.rear:
-            visited_p = False
-            for st in self.visited.keys():
-                if st.state == self.queue[self.front].state:
-                    visited_p = True
-                    break
-            if not visited_p:
-                print("The unvisited state under consideration: ", self.queue[self.front].state)
-                print("the required movable to get to this state is, ", self.queue[self.front].requiredMovable)
-                old_state = self.currentState
-                self.currentState = self.queue[self.front]
-                self.visited[self.currentState] = True
-                self.gm.makeMove(self.queue[self.front].requiredMovable)
-                if self.currentState.state == self.victoryCondition:
+            if self.queue[self.front].depth == self.currentstate.depth + 1:
+                aState = self.queue[self.front]
+                if aState.state == self.victoryCondition:
                     return True
-                else:
-                    self.currentState = old_state
-                    self.gm.reverseMove(self.queue[self.front].requiredMovable)
-                    print("reversed move ,", self.queue[self.front].requiredMovable)
-                    print("current state is, ", self.currentState.state)
+                self.front += 1
             else:
-                self.front = self.front + 1
+                print("WAT!!!!!")
+
+
+
+

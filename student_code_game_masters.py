@@ -162,11 +162,11 @@ class Puzzle8Game(GameMaster):
 
         # row 1
         row1 = [0, 0, 0]
-        in_row_1 = self.kb.kb_ask(parse_input('fact: (atY ?t pos1)'))
+        in_row_1 = self.kb.kb_ask(parse_input('fact: (coordinate ?t ?pos pos1)'))
         if in_row_1:
             for tile in in_row_1:
-                ask_row_pos = self.kb.kb_ask(parse_input('fact: (atX ' + tile.bindings_dict['?t'] + ' ?pos'))
-                row_pos = int(str(ask_row_pos[0].bindings_dict['?pos']).replace('pos',''))
+                ask_row_pos = self.kb.kb_ask(parse_input('fact: (coordinate ' + tile.bindings_dict['?t'] + ' ?posX pos1)'))
+                row_pos = int(str(ask_row_pos[0].bindings_dict['?posX']).replace('pos',''))
                 temp = tile.bindings_dict['?t']
                 if 'tile' in temp:
                     temp = temp.replace('tile', '')
@@ -175,11 +175,11 @@ class Puzzle8Game(GameMaster):
                     row1[row_pos-1] = -1
 
         row2 = [0, 0, 0]
-        in_row_2 = self.kb.kb_ask(parse_input('fact: (atY ?t pos2)'))
+        in_row_2 = self.kb.kb_ask(parse_input('fact: (coordinate ?t ?pos pos2)'))
         if in_row_2:
             for tile in in_row_2:
-                ask_row_pos = self.kb.kb_ask(parse_input('fact: (atX ' + tile.bindings_dict['?t'] + ' ?pos'))
-                row_pos = int(str(ask_row_pos[0].bindings_dict['?pos']).replace('pos',''))
+                ask_row_pos = self.kb.kb_ask(parse_input('fact: (coordinate ' + tile.bindings_dict['?t'] + ' ?posX pos2)'))
+                row_pos = int(str(ask_row_pos[0].bindings_dict['?posX']).replace('pos',''))
                 temp = tile.bindings_dict['?t']
                 if 'tile' in temp:
                     temp = temp.replace('tile', '')
@@ -188,11 +188,11 @@ class Puzzle8Game(GameMaster):
                     row2[row_pos-1] = -1
 
         row3 = [0, 0, 0]
-        in_row_3 = self.kb.kb_ask(parse_input('fact: (atY ?t pos3)'))
+        in_row_3 = self.kb.kb_ask(parse_input('fact: (coordinate ?t ?pos pos3)'))
         if in_row_3:
             for tile in in_row_3:
-                ask_row_pos = self.kb.kb_ask(parse_input('fact: (atX ' + tile.bindings_dict['?t'] + ' ?pos'))
-                row_pos = int(str(ask_row_pos[0].bindings_dict['?pos']).replace('pos',''))
+                ask_row_pos = self.kb.kb_ask(parse_input('fact: (coordinate ' + tile.bindings_dict['?t'] + ' ?posX pos3)'))
+                row_pos = int(str(ask_row_pos[0].bindings_dict['?posX']).replace('pos',''))
                 temp = tile.bindings_dict['?t']
                 if 'tile' in temp:
                     temp = temp.replace('tile', '')
@@ -230,14 +230,10 @@ class Puzzle8Game(GameMaster):
         targetY = matchedQuery['?targetY']
 
         # move the tile from init to target, move the blank from target to init
-        self.kb.kb_retract(parse_input('fact: (atX ' + tile + ' ' + initX + ')'))
-        self.kb.kb_retract(parse_input('fact: (atY ' + tile + ' ' + initY + ')'))
-        self.kb.kb_retract(parse_input('fact: (atX blank1 ' + targetX + ')'))
-        self.kb.kb_retract(parse_input('fact: (atY blank1 ' + targetY + ')'))
-        self.kb.kb_assert(parse_input('fact: (atX ' + tile + ' ' + targetX + ')'))
-        self.kb.kb_assert(parse_input('fact: (atY ' + tile + ' ' + targetY + ')'))
-        self.kb.kb_assert(parse_input('fact: (atX blank1 ' + initX + ')'))
-        self.kb.kb_assert(parse_input('fact: (atY blank1 ' + initY + ')'))
+        self.kb.kb_retract(parse_input('fact: (coordinate ' + tile + ' ' + initX + ' ' +  initY + ')'))
+        self.kb.kb_retract(parse_input('fact: (coordinate empty ' + targetX + ' ' + targetY + ')'))
+        self.kb.kb_assert(parse_input('fact: (coordinate ' + tile + ' ' + targetX + ' ' + targetY + ')'))
+        self.kb.kb_assert(parse_input('fact: (coordinate empty ' + initX + ' ' + initY + ')'))
 
 
     def reverseMove(self, movable_statement):

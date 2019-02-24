@@ -1,6 +1,6 @@
 """
 For a game with 8 tiles of blocks on a 3x3 grid,
-write down the Facts and Rules to model the game state 
+write down the Facts and Rules to model the game state
 shown as the follows:
 
  y\\x   pos1     pos2     pos3
@@ -12,54 +12,27 @@ pos2 | tile8  | empty  | tile4  |
 pos3 | tile7  | tile6  | tile5  |
      ----------------------------
 
-Example: 
+Example:
 fact: (pred obj1 obj2)
 rule: ((pred obj1 obj2) (pred obj2 obj3)) -> (pred obj1 obj3)
 
 """
 
-fact: (isA tile1 tile)
-fact: (isA tile2 tile)
-fact: (isA tile3 tile)
-fact: (isA tile4 tile)
-fact: (isA tile5 tile)
-fact: (isA tile6 tile)
-fact: (isA tile7 tile)
-fact: (isA tile8 tile)
+fact: (coordinate tile1 pos1 pos1)
+fact: (coordinate tile2 pos2 pos1)
+fact: (coordinate tile3 pos3 pos1)
 
-fact: (isA blank1 blank)
+fact: (coordinate tile8 pos1 pos2)
+fact: (coordinate empty pos2 pos2)
+fact: (coordinate tile4 pos3 pos2)
 
-fact: (atX tile1 pos1)
-fact: (atY tile1 pos1)
-fact: (atX tile2 pos2)
-fact: (atY tile2 pos1)
-fact: (atX tile3 pos3)
-fact: (atY tile3 pos1)
-fact: (atX tile4 pos3)
-fact: (atY tile4 pos2)
-fact: (atX tile5 pos3)
-fact: (atY tile5 pos3)
-fact: (atX tile6 pos2)
-fact: (atY tile6 pos3)
-fact: (atX tile7 pos1)
-fact: (atY tile7 pos3)
-fact: (atX tile8 pos1)
-fact: (atY tile8 pos2)
+fact: (coordinate tile7 pos1 pos3)
+fact: (coordinate tile6 pos2 pos3)
+fact: (coordinate tile5 pos3 pos3)
 
-fact: (atX blank1 pos2)
-fact: (atY blank1 pos2)
+rule: ((coordinate ?tile_a ?x pos2) (coordinate ?tile_b ?x ?y)) -> (adjacent ?tile_a ?tile_b)
+rule: ((coordinate ?tile_a pos2 ?y) (coordinate ?tile_b ?x ?y)) -> (adjacent ?tile_a ?tile_b)
+rule: ((coordinate ?tile_a ?x pos2) (coordinate ?tile_b ?x ?y)) -> (adjacent ?tile_b ?tile_a)
+rule: ((coordinate ?tile_a pos2 ?y) (coordinate ?tile_b ?x ?y)) -> (adjacent ?tile_b ?tile_a)
 
-rule: ((atX ?x ?a) (atX ?y ?a) (atY ?x pos2) (isA ?x tile) (isA ?y tile)) -> (adjacent ?x ?y)
-rule: ((atX ?x ?a) (atX ?y ?a) (atY ?y pos2) (isA ?x tile) (isA ?y tile)) -> (adjacent ?x ?y)
-rule: ((atY ?x ?a) (atY ?y ?a) (atX ?y pos2) (isA ?x tile) (isA ?y tile)) -> (adjacent ?x ?y)
-rule: ((atY ?x ?a) (atY ?y ?a) (atX ?x pos2) (isA ?x tile) (isA ?y tile)) -> (adjacent ?x ?y)
-
-rule: ((atX ?x ?a) (atX ?y ?a) (atY ?x pos2) (isA ?x tile) (isA ?y blank)) -> (adjacent ?x ?y)
-rule: ((atX ?x ?a) (atX ?y ?a) (atY ?y pos2) (isA ?x tile) (isA ?y blank)) -> (adjacent ?x ?y)
-rule: ((atY ?x ?a) (atY ?y ?a) (atX ?y pos2) (isA ?x tile) (isA ?y blank)) -> (adjacent ?x ?y)
-rule: ((atY ?x ?a) (atY ?y ?a) (atX ?x pos2) (isA ?x tile) (isA ?y blank)) -> (adjacent ?x ?y)
-
-rule: ((adjacent ?x ?y)) -> (adjacent ?y ?x)
-
-rule: ((adjacent ?tile ?blank) (isA ?tile tile) (isA ?blank blank) (atX ?tile ?tilex) (atY ?tile ?tiley) (atX ?blank ?blankx) (atY ?blank ?blanky)) -> (movable ?tile ?tilex ?tiley ?blankx ?blanky)
-
+rule: ((adjacent ?tile empty) (coordinate ?tile ?tx ?ty) (coordinate empty ?ex ?ey)) -> (movable ?tile ?tx ?ty ?ex ?ey)
