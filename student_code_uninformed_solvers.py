@@ -57,7 +57,6 @@ class SolverBFS(UninformedSolver):
         super().__init__(gameMaster, victoryCondition)
         self.queue = []
         self.front = 0
-        self.rear = 0
 
     def solveOneStep(self):
         """
@@ -73,12 +72,11 @@ class SolverBFS(UninformedSolver):
             True if the desired solution state is reached, False otherwise
         """
         ### Student code goes here
-        # a trivial case
+        #print("CALL")
+        #print("Current state is, ", self.currentState.state)
+
         if self.currentState.state == self.victoryCondition:
             return True
-
-        if not self.currentState.parent:
-            self.queue.append(self.currentState)
 
         if not self.currentState.children:
             movables = self.gm.getMovables()
@@ -87,20 +85,84 @@ class SolverBFS(UninformedSolver):
                 new_state = GameState(self.gm.getGameState(), self.currentState.depth + 1, move)
                 new_state.parent = self.currentState
                 self.currentState.children.append(new_state)
-                self.gm.reverseMove(move)
                 self.queue.append(new_state)
-                self.rear += 1
+                self.gm.reverseMove(move)
 
-        self.front += 1
-        while self.front <= self.rear:
-            if self.queue[self.front].depth == self.currentstate.depth + 1:
-                aState = self.queue[self.front]
-                if aState.state == self.victoryCondition:
-                    return True
-                self.front += 1
+        while self.front < len(self.queue):
+            # if already visited this state, skip it
+            if self.queue[self.front] in self.visited:
+                self.front = self.front + 1
             else:
-                print("WAT!!!!!")
+                aState = self.queue[self.front]
+                if aState.parent == self.currentState:
+                    #print("just go one level down to ", state.state)
+                    self.currentState = aState
+                    self.gm.makeMove(self.currentState.requiredMovable)
+                    self.visited[self.currentState] = True
+                    if self.currentState.state == self.victoryCondition:
+                        return True
+                    else:
+                        self.front += 1
+                        #self.solveOneStep()
+                        return False
+                else:
+                    if self.currentState.depth == aState.depth:
+                        # siblings?
+                        if self.currentState.parent == aState.parent:
+                            #print("go up and down to sibling ", state.state)
+                            self.gm.reverseMove(self.currentState.requiredMovable)
+                            #self.currentState = self.currentState.parent
+                            self.currentState = aState
+                            self.gm.makeMove(self.currentState.requiredMovable)
+                            self.visited[self.currentState] = True
+                            if self.currentState.state == self.victoryCondition:
+                                return True
+                            else:
+                                self.front += 1
+                                #self.solveOneStep()
+                                return False
+                        # cousins
+                        else:
+                            #print("go to cousin, ", state.state)
+                            while self.currentState.parent:
+                                self.gm.reverseMove(self.currentState.requiredMovable)
+                                self.currentState = self.currentState.parent
+                            moveLst = []
+                            tempState = aState
+                            for i in range(aState.depth):
+                                moveLst.append(tempState.requiredMovable)
+                                tempState = tempState.parent
+                            moveLst.reverse()
+                            for i in range(aState.depth):
+                                self.gm.makeMove(moveLst[i])
+                            self.currentState = aState
+                            self.visited[self.currentState] = True
+                            if self.currentState.state == self.victoryCondition:
+                               return True
+                            else:
+                                self.front += 1
+                               #self.solveOneStep()
+                                return False
 
-
-
-
+                    else:
+                        # state.depth > self.currentState.depth:
+                        #print("go to niece, ", state.state)
+                        while self.currentState.parent:
+                            self.gm.reverseMove(self.currentState.requiredMovable)
+                            self.currentState = self.currentState.parent
+                        moveLst = []
+                        tempState = aState
+                        for i in range(aState.depth):
+                            moveLst.append(tempState.requiredMovable)
+                            tempState = tempState.parent
+                        moveLst.reverse()
+                        for i in range(aState.depth):
+                            self.gm.makeMove(moveLst[i])
+                        self.currentState = aState
+                        self.visited[self.currentState] = True
+                        if self.currentState.state == self.victoryCondition:
+                            return True
+                        else:
+                            self.front += 1
+                            #self.solveOneStep()
+                            return False
