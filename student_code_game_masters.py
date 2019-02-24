@@ -220,20 +220,23 @@ class Puzzle8Game(GameMaster):
             None
         """
         ### Student code goes here
-        movableQuery = self.produceMovableQuery()
-        matchedQuery = match(movable_statement, movableQuery.statement)
+        if not(self.isMovableLegal(movable_statement)):
+            pass
+        else:
+            movableQuery = self.produceMovableQuery()
+            matchedQuery = match(movable_statement, movableQuery.statement)
 
-        tile = matchedQuery['?piece']
-        initX = matchedQuery['?initX']
-        initY = matchedQuery['?initY']
-        targetX = matchedQuery['?targetX']
-        targetY = matchedQuery['?targetY']
+            tile = matchedQuery['?piece']
+            initX = matchedQuery['?initX']
+            initY = matchedQuery['?initY']
+            targetX = matchedQuery['?targetX']
+            targetY = matchedQuery['?targetY']
 
-        # move the tile from init to target, move the blank from target to init
-        self.kb.kb_retract(parse_input('fact: (coordinate ' + tile + ' ' + initX + ' ' +  initY + ')'))
-        self.kb.kb_retract(parse_input('fact: (coordinate empty ' + targetX + ' ' + targetY + ')'))
-        self.kb.kb_assert(parse_input('fact: (coordinate ' + tile + ' ' + targetX + ' ' + targetY + ')'))
-        self.kb.kb_assert(parse_input('fact: (coordinate empty ' + initX + ' ' + initY + ')'))
+            # move the tile from init to target, move the blank from target to init
+            self.kb.kb_retract(parse_input('fact: (coordinate ' + tile + ' ' + initX + ' ' +  initY + ')'))
+            self.kb.kb_retract(parse_input('fact: (coordinate empty ' + targetX + ' ' + targetY + ')'))
+            self.kb.kb_assert(parse_input('fact: (coordinate ' + tile + ' ' + targetX + ' ' + targetY + ')'))
+            self.kb.kb_assert(parse_input('fact: (coordinate empty ' + initX + ' ' + initY + ')'))
 
 
     def reverseMove(self, movable_statement):
